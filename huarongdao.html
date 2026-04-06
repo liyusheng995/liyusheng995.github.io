@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>五四华容道 | 青春拼图挑战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免触屏长按菜单干扰 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #7c1e1e 0%, #a83232 30%, #d44a4a 100%);
+            /* 五四红色基调，热血青春 */
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans CJK SC', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            padding: 20px 16px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 五四装饰元素：老报纸风格纹理 + 复古墨迹 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,215,130,0.08) 2%, transparent 2.5%),
+                              repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 五四主题头部 */
+        .may-fourth-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .may-fourth-header h1 {
+            font-size: 2.8rem;
+            letter-spacing: 6px;
+            color: #fff7e8;
+            text-shadow: 6px 6px 0 #b13b3b, 2px 2px 12px rgba(0,0,0,0.3);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffecb3, #ffd966);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            display: inline-block;
+        }
+        .may-fourth-header h1 span {
+            background: none;
+            color: #ffec80;
+            text-shadow: 2px 2px 0 #9b2e2e;
+        }
+        .slogan {
+            font-size: 1rem;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 40px;
+            color: #ffefb9;
+            margin-top: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255,215,0,0.4);
+            letter-spacing: 1px;
+        }
+
+        /* 三个华容道选择卡片 */
+        .games-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .game-card {
+            background: rgba(255, 245, 220, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 42px;
+            padding: 18px 12px 16px;
+            width: 180px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,200,0.8);
+            border: 1px solid #ffd966;
+        }
+        .game-card.active {
+            background: #fff1cf;
+            box-shadow: 0 0 0 3px #ffb347, 0 12px 24px rgba(0,0,0,0.4);
+            transform: scale(1.02);
+        }
+        .game-card .card-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .game-card h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #a12222;
+            margin-bottom: 5px;
+        }
+        .game-card p {
+            font-size: 0.8rem;
+            color: #6b3e1c;
+            font-weight: 500;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: #fff3e0;
+        }
+
+        /* 游戏主区域 */
+        .game-area {
+            background: rgba(30, 15, 8, 0.45);
+            backdrop-filter: blur(10px);
+            border-radius: 64px;
+            padding: 24px 20px 28px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,200,0.3);
+            border: 1px solid rgba(255,200,100,0.6);
+            transition: all 0.2s;
+        }
+
+        .puzzle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puzzle-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: #301010aa;
+            display: inline-block;
+            padding: 6px 22px;
+            border-radius: 60px;
+            color: #ffeaac;
+            margin-bottom: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 5x5 网格容器 */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            background-color: #e9c891;
+            border: 4px solid #d49c3f;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px black;
+            width: min(78vw, 78vh, 500px);
+            height: min(78vw, 78vh, 500px);
+            max-width: 500px;
+            max-height: 500px;
+            margin: 0 auto;
+        }
+
+        /* 每个方块 */
+        .tile {
+            background-size: 500% 500%;  /* 5x5, 背景尺寸500%保证每个格显示完整一块 */
+            background-repeat: no-repeat;
+            border: 1px solid rgba(255,215,140,0.7);
+            cursor: pointer;
+            transition: 0.08s linear;
+            touch-action: manipulation;
+        }
+        .tile:active {
+            filter: brightness(0.92);
+            transform: scale(0.98);
+        }
+        /* 空白块样式 (第25块为空) */
+        .tile.empty {
+            background: #2d2218 !important;
+            box-shadow: inset 0 0 0 2px #ebc28e;
+            border: 1px solid #bd8a44;
+            opacity: 0.85;
+            cursor: pointer;
+        }
+        .tile.empty:active {
+            filter: brightness(1.1);
+        }
+
+        /* 胜利蒙层 */
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: inherit;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .victory-card {
+            background: #fff7e5;
+            border-radius: 60px;
+            padding: 30px 40px;
+            text-align: center;
+            max-width: 300px;
+            width: 80%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 2px solid #f5bc70;
+        }
+        .victory-card h2 {
+            font-size: 2.4rem;
+            color: #c53a1f;
+            margin-bottom: 16px;
+        }
+        .victory-card p {
+            font-size: 1.2rem;
+            margin-bottom: 28px;
+        }
+        .victory-card button {
+            background: #d4451e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .victory-card button:active {
+            transform: scale(0.96);
+        }
+
+        /* 底部按钮 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: #fdebb3;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #872222;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 5px 0 #a5571e;
+            touch-action: manipulation;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #a5571e;
+        }
+        .btn-shuffle {
+            background: #ffcf7a;
+            color: #862020;
+        }
+
+        /* 触屏提示 */
+        .touch-hint {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #fff1bf;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            width: auto;
+            padding: 6px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: #ffdd99;
+        }
+
+        @media (max-width: 650px) {
+            .game-card h3 { font-size: 1.3rem; }
+            .game-card { width: 150px; padding: 12px 8px; }
+            .may-fourth-header h1 { font-size: 2rem; letter-spacing: 3px; }
+            .puzzle-grid { width: min(85vw, 85vh); height: min(85vw, 85vh); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="may-fourth-header">
+        <h1>五四·<span>华容道</span></h1>
+        <div class="slogan">青春如火 · 拼图救国 | 指尖觉醒</div>
+    </div>
+
+    <!-- 三个华容道选择器 -->
+    <div class="games-panel" id="gameSelector">
+        <div class="game-card" data-game="0">
+            <div class="card-icon">📰</div>
+            <h3>新青年</h3>
+            <p>觉醒年代 · 热血拼图</p>
+        </div>
+        <div class="game-card" data-game="1">
+            <div class="card-icon">⚡</div>
+            <h3>五四风雷</h3>
+            <p>呐喊青春 · 革新意志</p>
+        </div>
+        <div class="game-card" data-game="2">
+            <div class="card-icon">🎓</div>
+            <h3>北大红楼</h3>
+            <p>星火燎原 · 百年传承</p>
+        </div>
+    </div>
+
+    <div class="game-area">
+        <div class="puzzle-wrapper">
+            <div class="puzzle-title" id="gameNameTitle">新青年 · 华容道</div>
+            <div class="puzzle-grid" id="puzzleGrid"></div>
+            <div class="action-buttons">
+                <button class="btn btn-shuffle" id="shuffleBtn">🔄 随机打乱</button>
+            </div>
+            <div class="touch-hint">✨ 点击相邻空白块即可移动拼图 | 五四精神，动手拼凑 ✨</div>
+        </div>
+    </div>
+    <footer>© 五四记忆 · 智趣华容道 | 5x5 经典拼图</footer>
+</div>
+
+<!-- 胜利弹窗 -->
+<div id="victoryOverlay" class="victory-overlay">
+    <div class="victory-card">
+        <h2>🎉 救国成功 🎉</h2>
+        <p>五四精神，薪火相传！</p>
+        <button id="closeVictoryBtn">继续奋斗</button>
+    </div>
+</div>
+
+<script>
+    // ======================= 请在此处替换为您自己的三张正方形图片链接 =======================
+    // 注意: 为了保证最佳切割效果，请使用正方形图片（宽高相等）。如果不是正方形，代码会自动居中裁剪为正方形。
+    // 您可以将本地图片转为 base64 或使用网络图片URL（需支持跨域或同源，网络图片建议使用允许跨域的图片）
+    
+    const CUSTOM_IMAGES = {
+        // 华容道1: 新青年主题图 (请替换成您的图片URL)
+        game0: "https://picsum.photos/id/104/500/500",  // 示例: 风景照，请替换！建议使用正方形图片链接
+        // 华容道2: 五四风雷主题图 (请替换成您的图片URL)
+        game1: "https://picsum.photos/id/155/500/500",  // 示例: 动物照，请替换！
+        // 华容道3: 北大红楼主题图 (请替换成您的图片URL)
+        game2: "https://picsum.photos/id/169/500/500"   // 示例: 建筑照，请替换！
+    };
+    
+    // 如果您想使用本地图片，可以将图片转为 DataURL 或使用相对路径，例如:
+    // game0: "images/my_image1.jpg",
+    // 强烈建议三张图片均为 500x500 或至少正方形比例，以获得完美切割效果。
+    // ========================================================================
+
+    // 游戏核心变量
+    let gameImages = [null, null, null];      // 存储处理后的正方形图片 dataURL
+    let currentGameIdx = 0;                  // 0,1,2
+    let tilesOrder = [];                     // 一维数组 25个，存储每个位置上的原始图片块索引(0-24)
+    const gameSize = 5;
+    const totalTiles = 25;
+    const emptyIndex = 24;                   // 空白块固定为索引24
+
+    // DOM 元素
+    const gridContainer = document.getElementById('puzzleGrid');
+    const gameNameTitle = document.getElementById('gameNameTitle');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const victoryOverlay = document.getElementById('victoryOverlay');
+    const closeVictoryBtn = document.getElementById('closeVictoryBtn');
+    const gameCards = document.querySelectorAll('.game-card');
+
+    // ---------- 辅助函数 ----------
+    function getSolvedOrder() {
+        let arr = [];
+        for(let i = 0; i < totalTiles; i++) arr.push(i);
+        return arr;
+    }
+
+    // 将任意图片处理为正方形 (居中裁剪) 并返回 dataURL (500x500)
+    function cropToSquare(imgElement) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 500;
+            canvas.height = 500;
+            const size = Math.min(imgElement.width, imgElement.height);
+            const sx = (imgElement.width - size) / 2;
+            const sy = (imgElement.height - size) / 2;
+            ctx.drawImage(imgElement, sx, sy, size, size, 0, 0, 500, 500);
+            resolve(canvas.toDataURL('image/png'));
+        });
+    }
+
+    // 加载图片URL并处理为正方形图片 dataURL
+    function loadImageAsSquare(url, gameIdx) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // 尝试解决跨域，如果图片服务器不支持可能失败，但大多数现代图床支持
+            img.onload = async () => {
+                try {
+                    const squareData = await cropToSquare(img);
+                    gameImages[gameIdx] = squareData;
+                    resolve(squareData);
+                } catch(e) {
+                    reject(e);
+                }
+            };
+            img.onerror = () => reject(new Error(`图片加载失败: ${url}`));
+            img.src = url;
+        });
+    }
+
+    // 渲染网格 (基于当前游戏的图片和 tilesOrder)
+    function renderGrid() {
+        const imgData = gameImages[currentGameIdx];
+        if(!imgData) {
+            // 图片未加载完成时显示占位
+            gridContainer.innerHTML = '';
+            for(let i = 0; i < totalTiles; i++) {
+                const placeholder = document.createElement('div');
+                placeholder.style.background = '#ab8e64';
+                placeholder.style.display = 'flex';
+                placeholder.style.alignItems = 'center';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.color = '#fff2cf';
+                placeholder.style.fontSize = '14px';
+                placeholder.style.border = '1px solid #daa55a';
+                placeholder.innerText = '⏳';
+                gridContainer.appendChild(placeholder);
+            }
+            return;
+        }
+
+        const tileW = 100 / gameSize;
+        const tileH = 100 / gameSize;
+        gridContainer.innerHTML = '';
+        for(let pos = 0; pos < totalTiles; pos++) {
+            const tileIdx = tilesOrder[pos];
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            if(tileIdx === emptyIndex) {
+                tile.classList.add('empty');
+                tile.style.background = '#2d2218';
+                tile.style.backgroundSize = 'cover';
+            } else {
+                const srcRow = Math.floor(tileIdx / gameSize);
+                const srcCol = tileIdx % gameSize;
+                const bgPosX = (srcCol * tileW);
+                const bgPosY = (srcRow * tileH);
+                tile.style.backgroundImage = `url(${imgData})`;
+                tile.style.backgroundSize = `${gameSize * 100}% ${gameSize * 100}%`;
+                tile.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                tile.style.backgroundColor = 'transparent';
+            }
+            tile.addEventListener('click', (function(p) {
+                return function() { tryMoveTile(p); };
+            })(pos));
+            gridContainer.appendChild(tile);
+        }
+        checkVictory();
+    }
+
+    // 移动逻辑
+    function tryMoveTile(clickedPos) {
+        const emptyPos = tilesOrder.indexOf(emptyIndex);
+        if(emptyPos === -1) return;
+        const clickedRow = Math.floor(clickedPos / gameSize);
+        const clickedCol = clickedPos % gameSize;
+        const emptyRow = Math.floor(emptyPos / gameSize);
+        const emptyCol = emptyPos % gameSize;
+        const isAdjacent = (Math.abs(clickedRow - emptyRow) + Math.abs(clickedCol - emptyCol)) === 1;
+        if(isAdjacent) {
+            [tilesOrder[clickedPos], tilesOrder[emptyPos]] = [tilesOrder[emptyPos], tilesOrder[clickedPos]];
+            renderGrid();
+        }
+    }
+
+    // 检查胜利
+    function checkVictory() {
+        let win = true;
+        for(let i = 0; i < totalTiles; i++) {
+            if(tilesOrder[i] !== i) {
+                win = false;
+                break;
+            }
+        }
+        if(win && gameImages[currentGameIdx] !== null) {
+            victoryOverlay.style.visibility = 'visible';
+            victoryOverlay.style.opacity = '1';
+        }
+    }
+
+    // 随机打乱 (保证有解: 随机移动足够步数)
+    function shufflePuzzle() {
+        if(!gameImages[currentGameIdx]) return;
+        // 重置为正确顺序
+        tilesOrder = getSolvedOrder();
+        const steps = 320;
+        for(let step = 0; step < steps; step++) {
+            const emptyPos = tilesOrder.indexOf(emptyIndex);
+            const emptyRow = Math.floor(emptyPos / gameSize);
+            const emptyCol = emptyPos % gameSize;
+            const neighbors = [];
+            if(emptyRow > 0) neighbors.push(emptyPos - gameSize);
+            if(emptyRow < gameSize-1) neighbors.push(emptyPos + gameSize);
+            if(emptyCol > 0) neighbors.push(emptyPos - 1);
+            if(emptyCol < gameSize-1) neighbors.push(emptyPos + 1);
+            if(neighbors.length === 0) continue;
+            const randNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+            [tilesOrder[emptyPos], tilesOrder[randNeighbor]] = [tilesOrder[randNeighbor], tilesOrder[emptyPos]];
+        }
+        // 极小概率胜利时再额外打乱
+        let isWin = true;
+        for(let i=0;i<totalTiles;i++) if(tilesOrder[i] !== i) { isWin = false; break; }
+        if(isWin) {
+            for(let extra=0; extra<30; extra++) {
+                const ep = tilesOrder.indexOf(emptyIndex);
+                const nb = [];
+                const er = Math.floor(ep / gameSize);
+                const ec = ep % gameSize;
+                if(er > 0) nb.push(ep - gameSize);
+                if(er < gameSize-1) nb.push(ep + gameSize);
+                if(ec > 0) nb.push(ep - 1);
+                if(ec < gameSize-1) nb.push(ep + 1);
+                if(nb.length) {
+                    const rand = nb[Math.floor(Math.random() * nb.length)];
+                    [tilesOrder[ep], tilesOrder[rand]] = [tilesOrder[rand], tilesOrder[ep]];
+                }
+            }
+        }
+        renderGrid();
+    }
+
+    // 切换游戏 (确保图片已加载)
+    async function switchGame(gameIndex) {
+        currentGameIdx = gameIndex;
+        const titles = ["新青年 · 华容道", "五四风雷 · 华容道", "北大红楼 · 华容道"];
+        gameNameTitle.innerText = titles[gameIndex];
+        
+        // 激活卡片样式
+        gameCards.forEach((card, idx) => {
+            if(idx === gameIndex) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+        
+        // 如果当前游戏的图片还未加载，则尝试加载 (理论上初始化时已全部预加载，但容错)
+        if(!gameImages[gameIndex]) {
+            // 显示加载占位
+            renderGrid();
+            // 尝试重新加载该游戏图片
+            let imgUrl = "";
+            if(gameIndex === 0) imgUrl = CUSTOM_IMAGES.game0;
+            else if(gameIndex === 1) imgUrl = CUSTOM_IMAGES.game1;
+            else imgUrl = CUSTOM_IMAGES.game2;
+            if(imgUrl) {
+                try {
+                    await loadImageAsSquare(imgUrl, gameIndex);
+                } catch(e) {
+                    console.error(e);
+                    gameImages[gameIndex] = null;
+                }
+            }
+        }
+        
+        // 重置为正确顺序并打乱 (确保每次切换都是打乱状态)
+        tilesOrder = getSolvedOrder();
+        if(gameImages[currentGameIdx]) {
+            shufflePuzzle(); // 内部打乱并渲染
+        } else {
+            renderGrid(); // 无图片时显示占位
+        }
+    }
+
+    // 随机打乱当前游戏 (按钮用)
+    function shuffleCurrent() {
+        if(gameImages[currentGameIdx]) {
+            shufflePuzzle();
+        } else {
+            alert("图片加载中，请稍后再打乱");
+        }
+    }
+
+    // 预加载所有自定义图片 (在页面初始化时完成)
+    async function preloadAllImages() {
+        const promises = [];
+        // 加载游戏0图片
+        if(CUSTOM_IMAGES.game0) {
+            promises.push(loadImageAsSquare(CUSTOM_IMAGES.game0, 0).catch(err => console.warn("游戏0图片加载失败", err)));
+        }
+        if(CUSTOM_IMAGES.game1) {
+            promises.push(loadImageAsSquare(CUSTOM_IMAGES.game1, 1).catch(err => console.warn("游戏1图片加载失败", err)));
+        }
+        if(CUSTOM_IMAGES.game2) {
+            promises.push(loadImageAsSquare(CUSTOM_IMAGES.game2, 2).catch(err => console.warn("游戏2图片加载失败", err)));
+        }
+        await Promise.all(promises);
+        // 所有图片加载完成，如果当前游戏图片已存在则渲染并打乱
+        if(gameImages[currentGameIdx]) {
+            tilesOrder = getSolvedOrder();
+            shufflePuzzle(); // 初次打乱
+        } else {
+            renderGrid();
+        }
+    }
+
+    // 事件绑定
+    function bindEvents() {
+        for(let i = 0; i < gameCards.length; i++) {
+            const card = gameCards[i];
+            const gameIdx = parseInt(card.getAttribute('data-game'));
+            card.addEventListener('click', () => {
+                switchGame(gameIdx);
+            });
+        }
+        shuffleBtn.addEventListener('click', () => {
+            shuffleCurrent();
+        });
+        closeVictoryBtn.addEventListener('click', () => {
+            victoryOverlay.style.visibility = 'hidden';
+            victoryOverlay.style.opacity = '0';
+        });
+        victoryOverlay.addEventListener('click', (e) => {
+            if(e.target === victoryOverlay) {
+                victoryOverlay.style.visibility = 'hidden';
+                victoryOverlay.style.opacity = '0';
+            }
+        });
+    }
+
+    // 初始化
+    async function init() {
+        bindEvents();
+        // 默认激活第一个游戏
+        currentGameIdx = 0;
+        gameNameTitle.innerText = "新青年 · 华容道";
+        gameCards.forEach((card, idx) => {
+            if(idx === 0) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+        // 开始预加载所有图片，并完成初始打乱
+        await preloadAllImages();
+    }
+    
+    init();
+</script>
+</body>
+</html>
